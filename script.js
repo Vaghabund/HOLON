@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const minSize = 12;
     const maxSize = 24;
     const step = 2;
+    const SCROLL_AMOUNT_RATIO = 0.8;
 
     // Load saved font size from localStorage
     const savedSize = localStorage.getItem('fontSize');
@@ -43,17 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('fontSize', size);
     }
 
+    // Get scroll amount
+    function getScrollAmount() {
+        return window.innerWidth * SCROLL_AMOUNT_RATIO;
+    }
+
     // Keyboard navigation for horizontal scrolling
     document.addEventListener('keydown', function(e) {
         const container = document.querySelector('.scroll-container');
-        const scrollAmount = window.innerWidth * 0.8;
 
         if (e.key === 'ArrowRight') {
             e.preventDefault();
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            container.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
         } else if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            container.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
         }
     });
 
@@ -76,13 +81,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const diff = touchStartX - touchEndX;
 
         if (Math.abs(diff) > swipeThreshold) {
-            const scrollAmount = window.innerWidth * 0.8;
             if (diff > 0) {
                 // Swipe left
-                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                container.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
             } else {
                 // Swipe right
-                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                container.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
             }
         }
     }
