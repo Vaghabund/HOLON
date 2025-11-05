@@ -1,177 +1,124 @@
-/* Global Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* Reset + box-sizing */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --base-font-size: 16px;
-    --heading-size: 2.5em;
-    --subheading-size: 1.8em;
-    --text-color: #000000;
-    --bg-color: #ffffff;
+  --base-font-size: 16px;
+  --color-ink: #111111;
+  --color-muted: #6b6b6b;
+  --color-bg: #ffffff;
+  --color-accent: #1a73e8;
+  --max-width: 1200px;
 }
 
+/* Local font provided in assets/ */
+@font-face {
+  font-family: 'TangerineLocal';
+  src: url('assets/Tangerine-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html { font-size: var(--base-font-size); }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
-    font-size: var(--base-font-size);
-    color: var(--text-color);
-    background-color: var(--bg-color);
-    overflow-x: auto;
-    overflow-y: hidden;
-    height: 100vh;
+  /* Use the local Tangerine font for all text, fall back to Inter/system fonts if unavailable */
+  font-family: 'TangerineLocal', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden; /* disable vertical scrolling */
 }
 
-/* Typography Controls */
-.typography-controls {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
-}
+.container { width: 100%; max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
 
-.typography-controls button {
-    background-color: var(--bg-color);
-    border: 2px solid var(--text-color);
-    color: var(--text-color);
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: bold;
-}
-
-.typography-controls button:hover {
-    background-color: var(--text-color);
-    color: var(--bg-color);
-}
-
-.typography-controls button:active {
-    transform: scale(0.95);
-}
-
-/* Horizontal Scroll Container */
+/* Kiosk horizontal layout styles */
+.kiosk { height:100vh; width:100vw; overflow:hidden; }
 .scroll-container {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  display:flex;
+  flex-direction:row;
+  height:100vh;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scroll-container::-webkit-scrollbar {
-    display: none;
+/* hide scrollbar visually */
+.scroll-container::-webkit-scrollbar { display:none; }
+.scroll-container { -ms-overflow-style:none; scrollbar-width:none; }
+
+/* Each panel is exactly one viewport wide and tall */
+.panel { min-width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+
+.panel-inner { width:100%; max-width:none; display:flex; gap:24px; align-items:stretch; justify-content:flex-start; flex-wrap:nowrap; padding:0; }
+
+/* Reverse class for alternating order */
+.panel.reverse .panel-inner { flex-direction:row-reverse; }
+
+.media { display:flex; align-items:stretch; justify-content:center; flex:0 0 40%; max-width:40%; }
+.media img { height:100vh; width:auto; max-width:100%; object-fit:cover; border-radius:0; box-shadow:none; }
+
+/* Keep the last panel's image at (or below) its original size to avoid upscaling/pixelation */
+.panel:last-child .media img {
+  height: auto;            /* don't force full-viewport height */
+  max-height: 90vh;       /* allow it to be large but not exceed viewport */
+  width: auto;            /* preserve natural width */
+  max-width: 100%;
+  object-fit: contain;    /* don't crop or stretch */
 }
 
-/* Content Panels */
-.content-panel {
-    min-width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 80px;
-    flex-shrink: 0;
+.panel:last-child .media { align-items:center; justify-content:center; }
+
+.text { flex:1 1 60%; max-width:60%; padding:0 24px; display:flex; flex-direction:column; justify-content:center; }
+
+/* Make first panel image cover left-to-mid section for a stronger visual */
+.panel:first-child .media { flex:0 0 55%; max-width:55%; }
+.panel:first-child .text { flex:1 1 45%; max-width:45%; }
+
+/* Make panels 2 and 3 images wider for stronger presence */
+.panel:nth-of-type(2) .media,
+.panel:nth-of-type(3) .media {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+.panel:nth-of-type(2) .text,
+.panel:nth-of-type(3) .text {
+  flex: 1 1 50%;
+  max-width: 50%;
+}
+.text h1, .text h2 { font-family: 'TangerineLocal', 'Playfair Display', serif; margin-bottom:8px; font-weight:500; line-height:1.05; }
+.text h1 { font-size: clamp(1.6rem, 4vw, 2.8rem); }
+.text h2 { font-size: clamp(1.25rem, 3vw, 1.8rem); }
+.text p { font-size: 1.05rem; color:var(--color-ink); line-height:1.9; font-weight:300; margin-bottom:1.4rem; }
+
+/* Constrain readable measure inside the text container without shrinking the container itself */
+.text > * { max-width: 450px; margin-left: 0; margin-right: 0; text-align: left; }
+
+.text pre {
+  /* match paragraph typography but preserve manual line breaks */
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: var(--color-ink);
+  line-height: 1.9;
+  font-weight: 300;
+  margin-bottom: 1.4rem;
+  white-space: pre-wrap; /* preserve line breaks, allow wrapping */
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
-/* Text Content */
-.text-content {
-    max-width: 700px;
-    line-height: 1.8;
+/* Headings constrained to the same measure and left-aligned */
+.text h1, .text h2 { max-width: 450px; margin-left: 0; margin-right: 0; text-align: left; }
+
+/* Small screens: stack image above text but keep each panel as one viewport */
+@media (max-width: 700px) {
+  .panel-inner { flex-direction:column; gap:18px; }
+  .panel.reverse .panel-inner { flex-direction:column; }
+  .media img { height:60vh; }
+  .text { padding: 0 12px; text-align:center; }
 }
 
-.text-content h1 {
-    font-size: var(--heading-size);
-    margin-bottom: 30px;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-}
-
-.text-content h2 {
-    font-size: var(--subheading-size);
-    margin-bottom: 25px;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-}
-
-.text-content p {
-    font-size: 1.1em;
-    line-height: 1.8;
-    font-weight: 300;
-}
-
-/* Image Content */
-.image-content {
-    max-width: 90%;
-    max-height: 90%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.image-content img {
-    max-width: 100%;
-    max-height: 80vh;
-    object-fit: contain;
-    display: block;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .content-panel {
-        padding: 40px 30px;
-    }
-
-    .text-content {
-        max-width: 100%;
-    }
-
-    .text-content h1 {
-        font-size: 2em;
-    }
-
-    .text-content h2 {
-        font-size: 1.5em;
-    }
-
-    .text-content p {
-        font-size: 1em;
-    }
-
-    .typography-controls {
-        top: 10px;
-        right: 10px;
-    }
-
-    .typography-controls button {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 480px) {
-    .content-panel {
-        padding: 30px 20px;
-    }
-
-    .text-content h1 {
-        font-size: 1.8em;
-    }
-
-    .text-content h2 {
-        font-size: 1.3em;
-    }
-
-    .typography-controls button {
-        padding: 6px 10px;
-        font-size: 12px;
-    }
-}
