@@ -24,23 +24,54 @@ const nextBtn = document.getElementById('nextBtn');
 
 // Find the first PDF file in the assets folder
 async function findPDF() {
-  // Try common PDF filenames first
-  const commonNames = ['exhibition.pdf', 'presentation.pdf', 'LickTheWalls.pdf'];
+  // First, try to load from config file (recommended approach)
+  try {
+    const configResponse = await fetch(ASSETS_FOLDER + 'config.json', { cache: 'no-cache' });
+    if (configResponse.ok) {
+      const config = await configResponse.json();
+      if (config.pdfFile) {
+        // Verify the PDF exists
+        const pdfResponse = await fetch(ASSETS_FOLDER + config.pdfFile, { 
+          method: 'HEAD',
+          cache: 'no-cache'
+        }).catch(() => null);
+        
+        if (pdfResponse && pdfResponse.ok) {
+          return ASSETS_FOLDER + config.pdfFile;
+        }
+      }
+    }
+  } catch (e) {
+    // Config file not found or invalid, fall back to auto-detection
+  }
+  
+  // Fallback: Try common PDF filenames
+  const commonNames = [
+    'exhibition.pdf',
+    'presentation.pdf', 
+    'LickTheWalls.pdf',
+    'slides.pdf',
+    'deck.pdf',
+    'kiosk.pdf'
+  ];
   
   for (const name of commonNames) {
     try {
-      const response = await fetch(ASSETS_FOLDER + name, { method: 'HEAD' });
-      if (response.ok) {
+      const response = await fetch(ASSETS_FOLDER + name, { 
+        method: 'HEAD',
+        cache: 'no-cache'
+      }).catch(() => null);
+      
+      if (response && response.ok) {
         return ASSETS_FOLDER + name;
       }
     } catch (e) {
-      // File doesn't exist, try next
+      // Silently continue to next filename
     }
   }
   
-  // If no common name found, we'll need to list directory (requires server support)
-  // For now, throw error asking user to use a standard name
-  throw new Error('No PDF found. Please place a PDF file named exhibition.pdf, presentation.pdf, or LickTheWalls.pdf in the assets folder.');
+  // If no PDF found, show helpful error
+  throw new Error('No PDF found in assets folder. Either add a config.json with {"pdfFile": "yourfile.pdf"} or use a common filename like exhibition.pdf');
 }
 
 // Initialize the PDF viewer
