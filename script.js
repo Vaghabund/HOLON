@@ -22,9 +22,8 @@ const dotsContainer = document.getElementById('dotsContainer');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 
-// Find the first PDF file in the assets folder
+// Find the PDF file from config
 async function findPDF() {
-  // First, try to load from config file (recommended approach)
   try {
     const configResponse = await fetch(ASSETS_FOLDER + 'config.json', { cache: 'no-cache' });
     if (configResponse.ok) {
@@ -34,44 +33,22 @@ async function findPDF() {
         const pdfResponse = await fetch(ASSETS_FOLDER + config.pdfFile, { 
           method: 'HEAD',
           cache: 'no-cache'
-        }).catch(() => null);
+        });
         
-        if (pdfResponse && pdfResponse.ok) {
+        if (pdfResponse.ok) {
           return ASSETS_FOLDER + config.pdfFile;
+        } else {
+          throw new Error(`PDF file "${config.pdfFile}" specified in config.json was not found in assets folder.`);
         }
+      } else {
+        throw new Error('config.json is missing "pdfFile" property.');
       }
+    } else {
+      throw new Error('config.json not found in assets folder.');
     }
   } catch (e) {
-    // Config file not found or invalid, fall back to auto-detection
+    throw new Error(`Failed to load PDF: ${e.message} Please ensure assets/config.json exists with {"pdfFile": "yourfile.pdf"}`);
   }
-  
-  // Fallback: Try common PDF filenames
-  const commonNames = [
-    'exhibition.pdf',
-    'presentation.pdf', 
-    'LickTheWalls.pdf',
-    'slides.pdf',
-    'deck.pdf',
-    'kiosk.pdf'
-  ];
-  
-  for (const name of commonNames) {
-    try {
-      const response = await fetch(ASSETS_FOLDER + name, { 
-        method: 'HEAD',
-        cache: 'no-cache'
-      }).catch(() => null);
-      
-      if (response && response.ok) {
-        return ASSETS_FOLDER + name;
-      }
-    } catch (e) {
-      // Silently continue to next filename
-    }
-  }
-  
-  // If no PDF found, show helpful error
-  throw new Error('No PDF found in assets folder. Either add a config.json with {"pdfFile": "yourfile.pdf"} or use a common filename like exhibition.pdf');
 }
 
 // Initialize the PDF viewer
