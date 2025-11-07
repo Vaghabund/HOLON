@@ -6,7 +6,7 @@ import * as pdfjsLib from './lib/pdf.min.mjs';
 pdfjsLib.GlobalWorkerOptions.workerSrc = './lib/pdf.worker.min.mjs';
 
 // Configuration
-const PDF_PATH = 'assets/exhibition.pdf';
+const ASSETS_FOLDER = 'assets/';
 const SCALE = 2.0; // Higher scale for better quality on large screens
 
 // State
@@ -14,13 +14,34 @@ let pdfDoc = null;
 let totalPages = 0;
 let currentPageIndex = 0;
 let renderedPages = [];
+let isAnimating = false;
 
 // DOM elements
 const scrollContainer = document.getElementById('pdfScrollContainer');
+const dotsContainer = document.getElementById('dotsContainer');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
-const currentPageSpan = document.getElementById('currentPage');
-const totalPagesSpan = document.getElementById('totalPages');
+
+// Find the first PDF file in the assets folder
+async function findPDF() {
+  // Try common PDF filenames first
+  const commonNames = ['exhibition.pdf', 'presentation.pdf', 'LickTheWalls.pdf'];
+  
+  for (const name of commonNames) {
+    try {
+      const response = await fetch(ASSETS_FOLDER + name, { method: 'HEAD' });
+      if (response.ok) {
+        return ASSETS_FOLDER + name;
+      }
+    } catch (e) {
+      // File doesn't exist, try next
+    }
+  }
+  
+  // If no common name found, we'll need to list directory (requires server support)
+  // For now, throw error asking user to use a standard name
+  throw new Error('No PDF found. Please place a PDF file named exhibition.pdf, presentation.pdf, or LickTheWalls.pdf in the assets folder.');
+}
 
 // Initialize the PDF viewer
 async function initPDFViewer() {
@@ -28,16 +49,20 @@ async function initPDFViewer() {
     // Show loading message
     scrollContainer.innerHTML = '<div class="loading">Loading PDF...</div>';
     
+    // Find the PDF file
+    const pdfPath = await findPDF();
+    console.log('Loading PDF from:', pdfPath);
+    
     // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument(PDF_PATH);
+    const loadingTask = pdfjsLib.getDocument(pdfPath);
     pdfDoc = await loadingTask.promise;
     totalPages = pdfDoc.numPages;
     
-    // Update total pages display
-    totalPagesSpan.textContent = totalPages;
-    
     // Clear loading message
     scrollContainer.innerHTML = '';
+    
+    // Generate navigation dots
+    generateDots();
     
     // Render all pages
     await renderAllPages();
@@ -45,8 +70,8 @@ async function initPDFViewer() {
     // Update navigation state
     updateNavigation();
     
-    // Setup scroll listener to track current page
-    setupScrollListener();
+    // Start at first page
+    goToPage(0);
     
   } catch (error) {
     console.error('Error loading PDF:', error);
@@ -56,6 +81,12 @@ async function initPDFViewer() {
 
 // Render all PDF pages
 async function renderAllPages() {
+  // Create wrapper for slides
+  const slidesWrapper = document.createElement('div');
+  slidesWrapper.className = 'pdf-slides-wrapper';
+  slidesWrapper.id = 'slidesWrapper';
+  scrollContainer.appendChild(slidesWrapper);
+  
   renderedPages = [];
   
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
@@ -74,7 +105,7 @@ async function renderAllPages() {
     pageDiv.setAttribute('data-page', pageNum);
     pageDiv.appendChild(canvas);
     
-    scrollContainer.appendChild(pageDiv);
+    slidesWrapper.appendChild(pageDiv);
     
     // Render the page
     const renderContext = {
@@ -87,75 +118,101 @@ async function renderAllPages() {
   }
 }
 
-// Setup scroll listener to track which page is currently visible
-function setupScrollListener() {
-  let scrollTimeout;
-  
-  scrollContainer.addEventListener('scroll', () => {
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      updateCurrentPageFromScroll();
-    }, 100);
-  });
-}
-
-// Update current page based on scroll position
-function updateCurrentPageFromScroll() {
-  const containerRect = scrollContainer.getBoundingClientRect();
-  const containerCenter = containerRect.left + containerRect.width / 2;
-  
-  let closestPage = 0;
-  let minDistance = Infinity;
-  
-  renderedPages.forEach((pageDiv, index) => {
-    const pageRect = pageDiv.getBoundingClientRect();
-    const pageCenter = pageRect.left + pageRect.width / 2;
-    const distance = Math.abs(containerCenter - pageCenter);
-    
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestPage = index;
-    }
-  });
-  
-  if (closestPage !== currentPageIndex) {
-    currentPageIndex = closestPage;
-    updateNavigation();
+// Generate navigation dots
+function generateDots() {
+  dotsContainer.innerHTML = '';
+  for (let i = 0; i < totalPages; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'page-dot';
+    if (i === 0) dot.classList.add('active');
+    dot.addEventListener('click', () => goToPage(i));
+    dotsContainer.appendChild(dot);
   }
 }
 
 // Update navigation buttons and page counter
 function updateNavigation() {
-  currentPageSpan.textContent = currentPageIndex + 1;
-  
   // Update button states
   prevBtn.disabled = currentPageIndex === 0;
   nextBtn.disabled = currentPageIndex === totalPages - 1;
+  
+  // Update dots
+  const dots = dotsContainer.querySelectorAll('.page-dot');
+  dots.forEach((dot, index) => {
+    if (index === currentPageIndex) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
 }
 
 // Navigate to specific page
 function goToPage(pageIndex) {
   if (pageIndex < 0 || pageIndex >= totalPages) return;
   
-  currentPageIndex = pageIndex;
-  const pageDiv = renderedPages[pageIndex];
+  // Don't do anything if we're already on this page
+  if (pageIndex === currentPageIndex) return;
   
-  if (pageDiv) {
-    // Scroll to center the page
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const pageRect = pageDiv.getBoundingClientRect();
-    const scrollLeft = scrollContainer.scrollLeft;
-    
-    const targetScroll = scrollLeft + pageRect.left - containerRect.left - 
-                        (containerRect.width - pageRect.width) / 2;
-    
-    scrollContainer.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth'
-    });
+  // Don't allow navigation while animating
+  if (isAnimating) return;
+  
+  isAnimating = true;
+  const previousIndex = currentPageIndex;
+  currentPageIndex = pageIndex;
+  
+  // Use transform to slide to the page
+  const slidesWrapper = document.getElementById('slidesWrapper');
+  if (slidesWrapper) {
+    const translateX = -pageIndex * 100; // 100vw per page
+    slidesWrapper.style.transform = `translateX(${translateX}vw)`;
   }
   
+  // Animate dots during transition
+  animateDotsTransition(previousIndex, pageIndex);
+  
   updateNavigation();
+  
+  // Allow new navigation after animation completes
+  setTimeout(() => {
+    isAnimating = false;
+  }, 400); // Match the 0.4s CSS transition
+}
+
+// Animate the fill transition between dots
+function animateDotsTransition(fromIndex, toIndex) {
+  const dots = dotsContainer.querySelectorAll('.page-dot');
+  const isGoingForward = toIndex > fromIndex;
+  
+  dots.forEach((dot, index) => {
+    // Remove all animation classes first
+    dot.classList.remove('fill-from-right', 'empty-to-right', 'empty-to-left');
+    
+    if (index === fromIndex) {
+      // Old dot: empty it in the direction we're moving
+      if (isGoingForward) {
+        dot.classList.add('empty-to-right'); // Going forward, empty to right
+      } else {
+        dot.classList.add('empty-to-left'); // Going backward, empty to left
+      }
+      // Remove active after a brief delay to trigger the animation
+      setTimeout(() => dot.classList.remove('active'), 10);
+      
+    } else if (index === toIndex) {
+      // New dot: fill it from the opposite direction
+      if (isGoingForward) {
+        // Going forward, fill from left (default)
+      } else {
+        // Going backward, fill from right
+        dot.classList.add('fill-from-right');
+      }
+      dot.classList.add('active');
+      
+    } else {
+      // All other dots: not active
+      dot.classList.remove('active');
+    }
+  });
 }
 
 // Event listeners for navigation buttons
@@ -184,13 +241,21 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Mouse wheel horizontal scrolling
-scrollContainer.addEventListener('wheel', (e) => {
-  if (Math.abs(e.deltaY) > 0) {
-    e.preventDefault();
-    scrollContainer.scrollLeft += e.deltaY * 1.2;
-  }
-}, { passive: false });
+// Mouse wheel navigation
+let wheelTimeout;
+document.addEventListener('wheel', (e) => {
+  // Debounce wheel events to prevent too rapid switching
+  clearTimeout(wheelTimeout);
+  wheelTimeout = setTimeout(() => {
+    if (e.deltaY > 0) {
+      // Scroll down = next page
+      goToPage(currentPageIndex + 1);
+    } else if (e.deltaY < 0) {
+      // Scroll up = previous page
+      goToPage(currentPageIndex - 1);
+    }
+  }, 50);
+}, { passive: true });
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
