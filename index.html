@@ -4,79 +4,25 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>HOLON — Exhibition (Kiosk)</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <!-- Kiosk horizontal-only container: each .panel is one screen (100vw x 100vh) -->
-        <div class="kiosk">
-            <div class="scroll-container">
-                <!-- Panel 1: image (portrait) left, text right -->
-                <section class="panel">
-                    <div class="panel-inner">
-                                    <div class="media">
-                                        <img src="assets/image1.jpg" alt="Portrait 1">
-                                    </div>
-                        <div class="text">
-                            <h1>Ħal Saflieni Hypogeum, Malta</h1>
-                                <p>And then she horns for us to come back to the mud and its wetness to drip with her slowly every drop reminding us of our reflection of the mother spider’s web in reverberation chamber</p>
-                                <p>Glasswater</p>
-                                <p>Gebla</p>
-                                <p>Where is the goddess now?</p>
-                                <p></p>
-                                <p></p>
-                                <p>– Text by Irene Trejo</p>
-                    </div>
-                </section>
-
-                <!-- Panel 2: text left, image right -->
-                <section class="panel reverse">
-                    <div class="panel-inner">
-                        <div class="text">
-                            <p>The Ħal Saflieni chambers were etched to channel, connect, and communicate with neighbouring temples, the seas, and the skies. Its resonance affects the body and mind, creating physiological sensations in those who listen attentively. Lick the walls to understand echoes is an invitation to submerge into the entanglement. The body is pulled into the folds of hums and soaring, ethereal tones. Through this complex audiovisual interplay, the artists have created a bridge to a space where ritual and sound are once again inseparable, where reverberation joins wither and flower.</p>
-                            <p></p>
-                            <p>Through its veiled silence, Idol engages with both the physical and metaphysical aspects of sound in space. The Ħal Saflieni Hypogeum contains a hollowed-out acoustic “Oracle Chamber” that resonates at around 70Hz and 114Hz. Where the goddess rests, reverberations reach beyond matter, into the underworld. And communal voices in prayer amplify and echo. They trace their origins to an ancient mutable source, offering new possibilities for their journey.</p>
-                        </div>
-                                    <div class="media">
-                                        <img src="assets/image2.png" alt="Portrait 2">
-                                    </div>
-                    </div>
-                </section>
-
-                <!-- Panel 3: image then text -->
-                <section class="panel">
-                    <div class="panel-inner">
-                                    <div class="media">
-                                        <img src="assets/image3.jpg" alt="Portrait 3">
-                                    </div>
-                        <div class="text">
-                            <pre>
-I rise with the waves,
-faces appearing and vanishing, faces in ecstasy,
-inhabiting the edge, the fragile threshold we call life.
-A life that, at times, whispers, taking its time to climb,
-only to fall back again.
-</pre>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Panel 4: text then image -->
-                <section class="panel reverse">
-                    <div class="panel-inner">
-                        <div class="text">
-                            <p>Sculpted from limestone, lying at the centre of the Ħal Saflieni Hypogeum, a goddess breathes. One with the stones, she echoes while the stones echo her back, containing her at the same time. She used to be a symbol of fertility and death, of rebirth. Now, through the undulating frequencies of the soundscape, Abigail Toll channels her once more, asking: How has the goddess survived? Perhaps just as a sound survives — through what and who it touches across different times.</p>
-                            <p>Through this manifestation of Toll's research, she invites us to feel and imagine what remains of ritual in connection with the Neolithic Great Mother archetype within Malta’s burial site and temple. The disappearance of rituals is connected to the lack of contemporary symbols reminding us of our connection with the cosmos and the earth. As Byung-Chul Han says, “symbolic perception, as recognition, is a perception of the permanent.” The installation arrives at a critical moment, as our world becomes increasingly devoid of symbols and their rites.
-
-</p>
-                        </div>
-                                    <div class="media">
-                                        <img src="assets/image4.jpg" alt="Portrait 4">
-                                    </div>
-                    </div>
+        <!-- PDF Viewer Kiosk -->
+        <div class="pdf-viewer-container">
+            <div class="pdf-scroll-container" id="pdfScrollContainer">
+                <!-- PDF pages will be rendered here -->
+            </div>
+            
+            <!-- Navigation Controls -->
+            <div class="pdf-controls">
+                <button id="prevBtn" class="control-btn">◀ Previous</button>
+                <span class="page-info">
+                    <span id="currentPage">1</span> / <span id="totalPages">-</span>
+                </span>
+                <button id="nextBtn" class="control-btn">Next ▶</button>
             </div>
         </div>
 
-        <script src="script.js"></script>
+        <script type="module" src="script.js"></script>
     </body>
 </html>
