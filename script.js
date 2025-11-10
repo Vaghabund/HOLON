@@ -193,29 +193,32 @@ function animateDotsTransition(fromIndex, toIndex) {
   const isGoingForward = toIndex > fromIndex;
   
   dots.forEach((dot, index) => {
-    // Remove all animation classes first
-    dot.classList.remove('fill-from-right', 'empty-to-right', 'empty-to-left');
-    
+    // Clear only the class that controls origin; keep active state changes below
+    dot.classList.remove('fill-from-right');
+
     if (index === fromIndex) {
-      // Old dot: empty it in the direction we're moving
+      // Old dot: set transform origin depending on direction so removal animates correctly
       if (isGoingForward) {
-        dot.classList.add('empty-to-right'); // Going forward, empty to right
+        // Going forward: shrink toward the right edge
+        dot.classList.add('fill-from-right');
       } else {
-        dot.classList.add('empty-to-left'); // Going backward, empty to left
+        // Going backward: ensure origin is left (default)
+        dot.classList.remove('fill-from-right');
       }
       // Remove active after a brief delay to trigger the animation
       setTimeout(() => dot.classList.remove('active'), 10);
-      
+
     } else if (index === toIndex) {
-      // New dot: fill it from the opposite direction
+      // New dot: set origin then activate to animate fill direction
       if (isGoingForward) {
         // Going forward, fill from left (default)
+        dot.classList.remove('fill-from-right');
       } else {
         // Going backward, fill from right
         dot.classList.add('fill-from-right');
       }
       dot.classList.add('active');
-      
+
     } else {
       // All other dots: not active
       dot.classList.remove('active');

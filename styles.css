@@ -80,7 +80,7 @@ body {
   justify-content: center;
   gap: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.062);
+  background: rgba(116, 116, 116, 0.068);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 50px;
