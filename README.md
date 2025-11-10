@@ -16,6 +16,10 @@ This repository contains a simple full-viewport PDF viewer intended for kiosk/ta
 }
 ```
 
+## Security & privacy — Important
+
+This site is published via GitHub Pages and is publicly accessible by design. Do NOT upload confidential or private PDFs to the `assets/` folder of this repository. Anything you place in `assets/` (including PDFs) will be downloadable by anyone who can reach the site or the repository.
+
 ## Deployment (GitHub Pages)
 
 The site is published from the `main` branch. To update the live site:
