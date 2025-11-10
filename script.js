@@ -265,6 +265,92 @@ document.addEventListener('wheel', (e) => {
   }, 50);
 }, { passive: true });
 
+// Touch / swipe navigation for touch screens
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let isTouching = false;
+const MIN_SWIPE_DISTANCE_PX = 50; // minimum horizontal movement to count as swipe
+const MAX_VERTICAL_DRIFT_PX = 100; // too-much-vertical-movement cancels swipe
+
+const getSlidesWrapper = () => document.getElementById('slidesWrapper');
+
+// We'll listen on the scrollContainer so it works even before pages are rendered
+scrollContainer.addEventListener('touchstart', (ev) => {
+  if (!ev.touches || ev.touches.length !== 1) return;
+  const t = ev.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+  touchStartTime = Date.now();
+  isTouching = true;
+  const wrapper = getSlidesWrapper();
+  if (wrapper) wrapper.style.transition = 'none'; // disable transition for drag feel
+}, { passive: true });
+
+scrollContainer.addEventListener('touchmove', (ev) => {
+  if (!isTouching) return;
+  if (!ev.touches || ev.touches.length !== 1) return;
+  const t = ev.touches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+
+  // If vertical movement dominates, don't treat as horizontal swipe (allow browser to handle)
+  if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+    // Let the browser handle vertical gestures
+    return;
+  }
+
+  // Prevent native scrolling while dragging horizontally
+  ev.preventDefault();
+
+  const wrapper = getSlidesWrapper();
+  if (!wrapper) return;
+
+  // Convert pixel delta to vw percentage for the existing transform usage
+  const vwDelta = (dx / window.innerWidth) * 100;
+  const baseTranslate = -currentPageIndex * 100;
+  wrapper.style.transform = `translateX(${baseTranslate + vwDelta}vw)`;
+}, { passive: false });
+
+scrollContainer.addEventListener('touchend', (ev) => {
+  if (!isTouching) return;
+  isTouching = false;
+  const touchEndTime = Date.now();
+  const elapsed = touchEndTime - touchStartTime;
+
+  // Some devices may report changedTouches on touchend
+  const changed = ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0] : null;
+  const endX = changed ? changed.clientX : touchStartX;
+  const endY = changed ? changed.clientY : touchStartY;
+
+  const dx = endX - touchStartX;
+  const dy = endY - touchStartY;
+
+  const wrapper = getSlidesWrapper();
+  if (wrapper) wrapper.style.transition = ''; // restore transition
+
+  // Quick guard: if vertical drift is large, cancel
+  if (Math.abs(dy) > MAX_VERTICAL_DRIFT_PX && Math.abs(dy) > Math.abs(dx)) {
+    // Snap back
+    if (wrapper) wrapper.style.transform = `translateX(${-currentPageIndex * 100}vw)`;
+    return;
+  }
+
+  // Determine if it's a swipe
+  if (Math.abs(dx) >= MIN_SWIPE_DISTANCE_PX && Math.abs(dx) > Math.abs(dy)) {
+    if (dx < 0) {
+      // swiped left => next page
+      goToPage(currentPageIndex + 1);
+    } else {
+      // swiped right => previous page
+      goToPage(currentPageIndex - 1);
+    }
+  } else {
+    // Not enough movement -> snap back to current page
+    if (wrapper) wrapper.style.transform = `translateX(${-currentPageIndex * 100}vw)`;
+  }
+}, { passive: true });
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initPDFViewer);

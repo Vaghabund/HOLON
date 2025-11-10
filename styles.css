@@ -36,6 +36,8 @@ body {
   overflow: hidden;
   position: relative;
   background: #fff;
+  /* Allow JS to fully control horizontal swipes */
+  touch-action: none;
 }
 
 /* Inner slides wrapper for transform-based sliding */
