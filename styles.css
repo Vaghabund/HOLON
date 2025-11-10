@@ -89,6 +89,39 @@ body {
   z-index: 100;
 }
 
+/* Remove native touch highlights and focus artifacts on interactive elements */
+.pdf-controls,
+.nav-arrow,
+.page-dot {
+  -webkit-tap-highlight-color: transparent; /* iOS/Android highlight */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  box-shadow: none !important;
+}
+
+.nav-arrow::-moz-focus-inner { /* Remove Firefox inner focus */
+  border: 0;
+}
+
+/* Sharpen UI edges: force own compositing layer and fine-tune rendering */
+.pdf-controls,
+.nav-arrow,
+.page-dot {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Make borders render crisper on many displays */
+.page-dot,
+.nav-arrow {
+  transform: translateZ(0.001px);
+}
+
 .nav-arrow {
   background: none;
   border: none;
@@ -145,52 +178,31 @@ body {
   position: absolute;
   left: 0;
   top: 0;
+  right: 0;
   bottom: 0;
-  width: 0%;
   background: #000;
-  transition: width 0.4s ease, left 0s;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.36s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+  z-index: 0;
 }
 
 .page-dot.active::before {
-  width: 100%;
+  /* scale slightly larger to avoid subpixel white gaps at the edges */
+  transform: scaleX(1.05);
 }
 
 /* Fill from right when going backward */
 .page-dot.fill-from-right::before {
-  left: auto;
-  right: 0;
+  transform-origin: right center;
 }
 
-/* Empty to left - shrinks from left to right (right side disappears) */
-.page-dot.empty-to-left::before {
-  left: 0;
-  right: auto;
-  width: 100%;
-  transition: width 0.4s ease;
-}
-
-.page-dot.empty-to-left.active::before {
-  width: 100%;
-}
-
-.page-dot.empty-to-left:not(.active)::before {
-  width: 0%;
-}
-
-/* Empty to right - shrinks from right to left (left side disappears) */
-.page-dot.empty-to-right::before {
-  left: auto;
-  right: 0;
-  width: 100%;
-  transition: width 0.4s ease;
-}
-
-.page-dot.empty-to-right.active::before {
-  width: 100%;
-}
-
-.page-dot.empty-to-right:not(.active)::before {
-  width: 0%;
+/* Ensure parent paints above the fill so the border remains visible and fill reaches edges */
+.page-dot {
+  z-index: 1;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
 }
 
 .page-dot:active {
