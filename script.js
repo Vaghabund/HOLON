@@ -182,9 +182,10 @@ function goToPage(pageIndex) {
   updateNavigation();
   
   // Allow new navigation after animation completes
+  // Unlock after the slide animation finishes (match CSS duration + small buffer)
   setTimeout(() => {
     isAnimating = false;
-  }, 400); // Match the 0.4s CSS transition
+  }, 650); // 600ms CSS + 50ms buffer
 }
 
 // Animate the fill transition between dots
