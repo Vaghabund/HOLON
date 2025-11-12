@@ -313,7 +313,23 @@ scrollContainer.addEventListener('touchmove', (ev) => {
   // Convert pixel delta to vw percentage for the existing transform usage
   const vwDelta = (dx / window.innerWidth) * 100;
   const baseTranslate = -currentPageIndex * 100;
-  wrapper.style.transform = `translateX(${baseTranslate + vwDelta}vw)`;
+
+  // Compute clamped translate to avoid overscrolling beyond first/last page.
+  const maxTranslate = 0; // first page
+  const minTranslate = -((totalPages - 1) * 100); // last page
+  let attempted = baseTranslate + vwDelta;
+
+  // Apply a small resistance when attempting to overscroll so the user feels a boundary,
+  // but we don't move fully beyond allowed range which could leave the UI stuck.
+  if (attempted > maxTranslate) {
+    const overshoot = attempted - maxTranslate;
+    attempted = maxTranslate + overshoot / 3; // resistance
+  } else if (attempted < minTranslate) {
+    const overshoot = attempted - minTranslate;
+    attempted = minTranslate + overshoot / 3; // resistance
+  }
+
+  wrapper.style.transform = `translateX(${attempted}vw)`;
 }, { passive: false });
 
 scrollContainer.addEventListener('touchend', (ev) => {
@@ -342,12 +358,13 @@ scrollContainer.addEventListener('touchend', (ev) => {
 
   // Determine if it's a swipe
   if (Math.abs(dx) >= MIN_SWIPE_DISTANCE_PX && Math.abs(dx) > Math.abs(dy)) {
-    if (dx < 0) {
-      // swiped left => next page
-      goToPage(currentPageIndex + 1);
+    // Compute intended page but guard against out-of-range navigation.
+    const intendedPage = dx < 0 ? currentPageIndex + 1 : currentPageIndex - 1;
+    if (intendedPage < 0 || intendedPage >= totalPages) {
+      // Out of bounds swipe: snap back to current page (don't call goToPage which would no-op)
+      if (wrapper) wrapper.style.transform = `translateX(${-currentPageIndex * 100}vw)`;
     } else {
-      // swiped right => previous page
-      goToPage(currentPageIndex - 1);
+      goToPage(intendedPage);
     }
   } else {
     // Not enough movement -> snap back to current page
