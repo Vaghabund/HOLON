@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>HOLON — GS Viewer</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script>
+            window.__holonViewerBooted = false;
+            window.setTimeout(() => {
+                if (window.__holonViewerBooted) {
+                    return;
+                }
+
+                const title = document.getElementById('viewerStatusTitle');
+                const body = document.getElementById('viewerStatusBody');
+                const panel = document.getElementById('viewerStatus');
+
+                if (title) {
+                    title.textContent = 'Viewer failed to start';
+                }
+                if (body) {
+                    body.textContent = 'The GS viewer script could not finish loading. This is usually a network or module import issue.';
+                }
+                if (panel) {
+                    panel.classList.remove('viewer-status-hidden');
+                    panel.classList.add('viewer-status-error');
+                }
+            }, 4000);
+        </script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.178.0/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/",
+                    "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@0.1.10/dist/spark.module.js"
+                }
+            }
+        </script>
+    </head>
+    <body class="viewer-page">
+        <a class="experience-home-link experience-home-link-dark" href="index.html" aria-label="Back to menu">Menu</a>
+        <div class="viewer-toolbar" aria-label="Viewer controls">
+            <button class="viewer-toolbar-button" id="resetViewButton" type="button">Reset View</button>
+            <button class="viewer-toolbar-button" id="frameObjectButton" type="button">Frame Object</button>
+        </div>
+
+        <main class="viewer-shell">
+            <canvas id="gsCanvas" class="viewer-canvas" tabindex="0"></canvas>
+
+            <section class="viewer-overlay" id="viewerStatus" aria-live="polite">
+                <div class="viewer-panel viewer-status-card">
+                    <p class="viewer-status-kicker">Gaussian Splat Viewer</p>
+                    <h1 id="viewerStatusTitle">Loading scene</h1>
+                    <p id="viewerStatusBody">Preparing the configured gaussian splat.</p>
+                </div>
+            </section>
+
+            <aside class="viewer-panel viewer-debug" id="viewerDebug" aria-live="off">
+                <p class="viewer-debug-title">Debug</p>
+                <pre class="viewer-debug-content" id="viewerDebugContent">Waiting for camera...</pre>
+            </aside>
+
+            <aside class="viewer-panel viewer-hint" id="viewerHint">
+                One finger orbits. Two fingers pan and zoom.
+            </aside>
+        </main>
+
+        <script type="module" src="viewer.js"></script>
+    </body>
+</html>
