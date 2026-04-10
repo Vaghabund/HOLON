@@ -14,8 +14,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mkkellogg/gaussian-splats-3d": "^0.4.7",
     "@sparkjsdev/spark": "^0.1.10",
-    "pdfjs-dist": "^5.4.394"
-    ,"three": "^0.178.0"
+    "pdfjs-dist": "^5.4.394",
+    "three": "^0.178.0"
   }
 }
