@@ -173,14 +173,61 @@ body {
   background: #f4f2ec;
 }
 
-.viewer-shell {
+.compare-shell {
   width: 100vw;
   height: 100vh;
-  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 84px 18px 18px;
   overflow: hidden;
 }
 
-.viewer-canvas {
+.compare-pane {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.compare-pane-header {
+  padding: 0 6px;
+}
+
+.compare-pane-kicker {
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.52);
+}
+
+.compare-pane-title {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1;
+  color: var(--text-strong);
+}
+
+.compare-pane-copy {
+  margin-top: 8px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.compare-canvas-shell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.25) 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(231, 225, 214, 0.86));
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+}
+
+.compare-canvas {
   width: 100%;
   height: 100%;
   display: block;
@@ -255,32 +302,6 @@ body {
 .viewer-hint-visible {
   opacity: 1;
   transform: translateY(0);
-}
-
-.viewer-debug {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  min-width: 240px;
-  max-width: min(320px, calc(100vw - 48px));
-  padding: 14px 16px;
-}
-
-.viewer-debug-title {
-  margin-bottom: 8px;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(17, 17, 17, 0.52);
-}
-
-.viewer-debug-content {
-  margin: 0;
-  font-family: Consolas, 'Courier New', monospace;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: rgba(17, 17, 17, 0.82);
-  white-space: pre-wrap;
 }
 
 /* PDF Viewer Container */
@@ -503,6 +524,17 @@ body {
 }
 
 @media (max-width: 760px) {
+  .compare-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+    padding-top: 96px;
+  }
+
+  .compare-pane {
+    min-height: 42vh;
+  }
+
   .landing-shell {
     padding: 18px;
   }
@@ -529,6 +561,7 @@ body {
     top: 14px;
     right: 14px;
     gap: 8px;
+    flex-direction: column;
   }
 
   .viewer-toolbar-button {
@@ -543,13 +576,8 @@ body {
 
   .viewer-hint {
     right: 18px;
-    bottom: 18px;
-    max-width: calc(100vw - 36px);
-  }
-
-  .viewer-debug {
     left: 18px;
-    bottom: 84px;
+    bottom: 168px;
     max-width: calc(100vw - 36px);
   }
 }

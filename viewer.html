@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>HOLON — GS Viewer</title>
+        <title>HOLON - Model Compare</title>
         <link rel="stylesheet" href="styles.css" />
         <script>
             window.__holonViewerBooted = false;
@@ -12,19 +12,19 @@
                     return;
                 }
 
-                const title = document.getElementById('viewerStatusTitle');
-                const body = document.getElementById('viewerStatusBody');
-                const panel = document.getElementById('viewerStatus');
+                for (const pane of document.querySelectorAll('[data-status-panel]')) {
+                    const title = pane.querySelector('[data-status-title]');
+                    const body = pane.querySelector('[data-status-body]');
 
-                if (title) {
-                    title.textContent = 'Viewer failed to start';
-                }
-                if (body) {
-                    body.textContent = 'The GS viewer script could not finish loading. This is usually a network or module import issue.';
-                }
-                if (panel) {
-                    panel.classList.remove('viewer-status-hidden');
-                    panel.classList.add('viewer-status-error');
+                    if (title) {
+                        title.textContent = 'Viewer failed to start';
+                    }
+                    if (body) {
+                        body.textContent = 'The comparison viewer script could not finish loading. This is usually a network or module import issue.';
+                    }
+
+                    pane.classList.remove('viewer-status-hidden');
+                    pane.classList.add('viewer-status-error');
                 }
             }, 4000);
         </script>
@@ -41,28 +41,49 @@
     <body class="viewer-page">
         <a class="experience-home-link experience-home-link-dark" href="index.html" aria-label="Back to menu">Menu</a>
         <div class="viewer-toolbar" aria-label="Viewer controls">
-            <button class="viewer-toolbar-button" id="resetViewButton" type="button">Reset View</button>
-            <button class="viewer-toolbar-button" id="frameObjectButton" type="button">Frame Object</button>
+            <button class="viewer-toolbar-button" id="resetViewButton" type="button">Reset Views</button>
+            <button class="viewer-toolbar-button" id="frameObjectButton" type="button">Frame Models</button>
         </div>
 
-        <main class="viewer-shell">
-            <canvas id="gsCanvas" class="viewer-canvas" tabindex="0"></canvas>
-
-            <section class="viewer-overlay" id="viewerStatus" aria-live="polite">
-                <div class="viewer-panel viewer-status-card">
-                    <p class="viewer-status-kicker">Gaussian Splat Viewer</p>
-                    <h1 id="viewerStatusTitle">Loading scene</h1>
-                    <p id="viewerStatusBody">Preparing the configured gaussian splat.</p>
+        <main class="compare-shell">
+            <section class="compare-pane" aria-labelledby="leftModelTitle">
+                <header class="compare-pane-header">
+                    <p class="compare-pane-kicker" id="leftModelType">SPZ</p>
+                    <h1 class="compare-pane-title" id="leftModelTitle">Preparing model</h1>
+                    <p class="compare-pane-copy" id="leftModelFile">Waiting for configuration.</p>
+                </header>
+                <div class="compare-canvas-shell">
+                    <canvas id="leftCanvas" class="compare-canvas" tabindex="0" aria-label="Left model viewer"></canvas>
+                    <section class="viewer-overlay" id="leftStatus" data-status-panel aria-live="polite">
+                        <div class="viewer-panel viewer-status-card">
+                            <p class="viewer-status-kicker">Left Comparison Pane</p>
+                            <h2 id="leftStatusTitle" data-status-title>Loading model</h2>
+                            <p id="leftStatusBody" data-status-body>Preparing the configured model.</p>
+                        </div>
+                    </section>
                 </div>
             </section>
 
-            <aside class="viewer-panel viewer-debug" id="viewerDebug" aria-live="off">
-                <p class="viewer-debug-title">Debug</p>
-                <pre class="viewer-debug-content" id="viewerDebugContent">Waiting for camera...</pre>
-            </aside>
+            <section class="compare-pane" aria-labelledby="rightModelTitle">
+                <header class="compare-pane-header">
+                    <p class="compare-pane-kicker" id="rightModelType">GLB</p>
+                    <h1 class="compare-pane-title" id="rightModelTitle">Preparing model</h1>
+                    <p class="compare-pane-copy" id="rightModelFile">Waiting for configuration.</p>
+                </header>
+                <div class="compare-canvas-shell">
+                    <canvas id="rightCanvas" class="compare-canvas" tabindex="0" aria-label="Right model viewer"></canvas>
+                    <section class="viewer-overlay" id="rightStatus" data-status-panel aria-live="polite">
+                        <div class="viewer-panel viewer-status-card">
+                            <p class="viewer-status-kicker">Right Comparison Pane</p>
+                            <h2 id="rightStatusTitle" data-status-title>Loading model</h2>
+                            <p id="rightStatusBody" data-status-body>Preparing the configured model.</p>
+                        </div>
+                    </section>
+                </div>
+            </section>
 
             <aside class="viewer-panel viewer-hint" id="viewerHint">
-                One finger orbits. Two fingers pan and zoom.
+                Drag either pane to orbit. Two fingers or right-drag pans. Wheel or pinch zooms.
             </aside>
         </main>
 

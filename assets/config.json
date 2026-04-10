@@ -1,4 +1,15 @@
 {
   "pdfFile": "Table PDF.pdf",
-  "splatFile": "Intrabeam_GS.spz"
+  "compareModels": [
+    {
+      "label": "PLY Source",
+      "kind": "splat",
+      "file": "HW2 4P DO_ply.ply"
+    },
+    {
+      "label": "GLB Output",
+      "kind": "glb",
+      "file": "HW2 4P DO_glb.glb"
+    }
+  ]
 }

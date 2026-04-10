@@ -2,28 +2,31 @@
 
 Live demo: https://vaghabund.github.io/HOLON/
 
-This repository contains a small two-route exhibition site intended for kiosk or table installations. The landing page lets visitors choose between a full-viewport PDF viewer and a simple Spark-based gaussian splat viewer.
+This repository contains a small two-route exhibition site intended for kiosk or table installations. The landing page lets visitors choose between a full-viewport PDF viewer and a side-by-side model comparison viewer.
 
 ## How to use
 
-1. Place your PDF file and gaussian splat file into the `assets/` folder at the project root.
+1. Place your PDF file and any comparison assets into the `assets/` folder at the project root.
 
-2. Open `assets/config.json` and set the `pdfFile` and `splatFile` properties to the filenames you uploaded. Example:
+2. Open `assets/config.json` and set the `pdfFile` plus the two `compareModels` entries to the filenames you uploaded. Example:
 
 ```json
 {
 	"pdfFile": "MyPresentation.pdf",
-	"splatFile": "MyScene.ply"
+	"compareModels": [
+		{ "label": "SPZ Output", "kind": "splat", "file": "MyScene.spz" },
+		{ "label": "GLB Output", "kind": "glb", "file": "MyScene.glb" }
+	]
 }
 ```
 
-3. Open `index.html` to choose between the PDF viewer and the GS viewer.
+3. Open `index.html` to choose between the PDF viewer and the model comparison viewer.
 
-## Gaussian splat viewer notes
+## Model comparison notes
 
-- The first implementation is configured for Spark via browser ES modules from a CDN.
-- The GS viewer reads `splatFile` from `assets/config.json` and currently expects a Spark-supported format such as `.ply`, `.spz`, `.splat`, or `.ksplat`.
-- The default repository asset is `assets/Intrabeam_GS.ply`.
+- The left pane uses Spark for splat-compatible files such as `.ply`, `.spz`, `.splat`, or `.ksplat`.
+- The right pane uses Three.js `GLTFLoader` for `.glb` or `.gltf` files.
+- The viewer reads the first two `compareModels` entries from `assets/config.json`.
 
 ## Compress large splats
 
@@ -38,16 +41,16 @@ npm install
 2. Convert the splat:
 
 ```bash
-npm run splat:compress -- ./assets/Intrabeam_GS.ply
+npm run splat:compress -- ./assets/MyScene.ply --output ./assets/MyScene.spz
 ```
 
-3. Point `assets/config.json` at the generated `.spz` file.
+3. Point the left-side `compareModels` entry in `assets/config.json` at the generated `.spz` file.
 
 Useful options:
 
 ```bash
-npm run splat:compress -- ./assets/Intrabeam_GS.ply --output ./assets/Intrabeam_GS.spz
-npm run splat:compress -- ./assets/Intrabeam_GS.ply --max-sh 1 --filter-opacity 0.01
+npm run splat:compress -- ./assets/MyScene.ply --output ./assets/MyScene.spz
+npm run splat:compress -- ./assets/MyScene.ply --max-sh 1 --filter-opacity 0.01
 ```
 
 ## Security & privacy — Important
